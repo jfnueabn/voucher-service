@@ -52,7 +52,14 @@ With a shared database, the new row locks hold across instances. Before this cha
 
 ## Reflections
 
-> TODO (your own words):
-> - What did you get wrong first, and how did you notice?
-> - Which AI suggestion did you reject, and why?
-> - What took you longest?
+**What did you get wrong first, and how did you notice?**
+
+My first mental model was “count the user’s redemptions, reject if ≥ limit, otherwise insert.” That’s a check-then-act race: two simultaneous requests from the same user both see 1 of 2 and both get through. I didn’t trust that the locking fix worked just because tests passed, so I removed the locks and re-ran the concurrency test. All 8 parallel redeems succeeded against a limit of 1. That showed both the bug and that the test really catches it.
+
+**Which AI suggestion did you reject, and why?**
+
+The AI laid out two options for voided vouchers: count them toward the limit, or not. I chose not to count them, because a voided voucher gave the user nothing, so it shouldn’t use up their allowance. That’s why user-99 is at 1 of 2.
+
+**What took you longest?**
+
+Most of the time went into checking the locking in VoucherService and confirming the concurrency test fails without the locks.
